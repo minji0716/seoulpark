@@ -5,7 +5,7 @@ st.set_page_config(page_title="서울시 공원 분석", page_icon="🌳")
 
 st.title("🌳 서울시 공원 데이터 분석")
 
-url = "깃허브_RAW_주소"
+url = "https://raw.githubusercontent.com/..."
 
 @st.cache_data
 def load_data():
