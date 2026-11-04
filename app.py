@@ -45,8 +45,15 @@ try:
 
     st.write("2. 데이터 불러오기 완료")
 
-    st.success("데이터 불러오기 성공!")
+    # 면적 숫자만 추출
+    df["면적_숫자"] = pd.to_numeric(
+        df["면적"].astype(str)
+        .str.replace(",", "", regex=False)
+        .str.extract(r"([\d.]+)")[0],
+        errors="coerce"
+    )
 
+    st.success("데이터 불러오기 성공!")
     # 요약 정보
     col1, col2, col3 = st.columns(3)
 
