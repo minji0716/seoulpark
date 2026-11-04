@@ -3,28 +3,35 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+# 페이지 설정
 st.set_page_config(
-    page_title="서울시 공원 분석",
+    page_title="서울시 공원 데이터 분석",
     page_icon="🌳",
     layout="wide"
 )
 
+# 제목
 st.title("🌳 서울시 주요 공원 데이터 분석")
 st.write("서울시 공원들의 면적과 지역별 특징을 분석합니다.")
 
+# 엑셀 파일 주소
 url = "https://github.com/minji0716/seoulpark/raw/refs/heads/main/data/%EC%84%9C%EC%9A%B8%EC%8B%9C%20%EC%A3%BC%EC%9A%94%20%EA%B3%B5%EC%9B%90%ED%98%84%ED%99%A9(2026%20%ED%95%98%EB%B0%98%EA%B8%B0).xlsx"
 
 
+# 데이터 불러오기
 @st.cache_data
 def load_data():
     raw = pd.read_excel(url, header=None)
+
     raw.columns = raw.iloc[1]
     df = raw.iloc[2:].copy().reset_index(drop=True)
+
     return df
 
 
+# 데이터 분석 실행
 try:
-    # 데이터 불러오기
+
     df = load_data()
 
     # 면적 숫자만 추출
@@ -49,11 +56,11 @@ try:
 
     st.divider()
 
-    # 그래프 1: 공원 면적 분포
-    st.subheader("📊 공원 면적 분포")
+    # 1. 공원 면적 분포
+    st.header("📊 공원 면적 분포")
 
     fig1 = px.histogram(
-        df,
+        df.dropna(subset=["면적_숫자"]),
         x="면적_숫자",
         nbins=20,
         title="서울시 공원 면적 분포",
@@ -62,8 +69,8 @@ try:
 
     st.plotly_chart(fig1, use_container_width=True)
 
-    # 그래프 2: 지역별 공원 개수
-    st.subheader("📍 지역별 공원 개수")
+    # 2. 지역별 공원 개수
+    st.header("📍 지역별 공원 개수")
 
     region = df["지역"].value_counts().reset_index()
     region.columns = ["지역", "공원 수"]
@@ -72,13 +79,14 @@ try:
         region,
         x="지역",
         y="공원 수",
-        title="지역별 공원 개수"
+        title="지역별 공원 개수",
+        text="공원 수"
     )
 
     st.plotly_chart(fig2, use_container_width=True)
 
-    # 그래프 3: 면적 TOP 10
-    st.subheader("🏆 면적이 큰 공원 TOP 10")
+    # 3. 면적 TOP 10
+    st.header("🏆 면적이 큰 공원 TOP 10")
 
     top10 = df.nlargest(10, "면적_숫자")
 
@@ -87,7 +95,11 @@ try:
         x="면적_숫자",
         y="공원명",
         orientation="h",
-        title="면적 기준 상위 10개 공원"
+        title="면적 기준 상위 10개 공원",
+        labels={
+            "면적_숫자": "공원 면적(㎡)",
+            "공원명": "공원 이름"
+        }
     )
 
     fig3.update_layout(
@@ -98,7 +110,7 @@ try:
 
     st.divider()
 
-    # 결측치 분석
+    # 4. 결측치 분석
     st.header("🔍 결측치 분석")
 
     missing = df.drop(
@@ -109,11 +121,12 @@ try:
         ascending=False
     )
 
-    if len(missing) > 0:
+    if not missing.empty:
+
         missing_df = missing.reset_index()
         missing_df.columns = ["항목", "결측치 개수"]
 
-        fig_missing = px.bar(
+        fig4 = px.bar(
             missing_df,
             x="항목",
             y="결측치 개수",
@@ -121,20 +134,27 @@ try:
             text="결측치 개수"
         )
 
-        st.plotly_chart(
-            fig_missing,
+        st.plotly_chart(fig4, use_container_width=True)
+
+        st.dataframe(
+            missing_df,
             use_container_width=True
         )
-    else:
-        st.success("결측치가 없습니다!")
 
-    # 이상치 분석
+    else:
+        st.success("결측치가 없습니다.")
+
+    st.divider()
+
+    # 5. 이상치 분석
     st.header("📦 이상치 분석")
-    st.write("상자그림으로 공원 면적의 이상치를 확인합니다.")
+
+    st.write("공원 면적의 상자그림을 이용해 이상치를 확인합니다.")
 
     area = df["면적_숫자"].dropna()
 
     if len(area) > 0:
+
         q1 = area.quantile(0.25)
         q3 = area.quantile(0.75)
         iqr = q3 - q1
@@ -147,7 +167,7 @@ try:
             (df["면적_숫자"] > upper)
         ].dropna(subset=["면적_숫자"])
 
-        fig_outlier = px.box(
+        fig5 = px.box(
             df.dropna(subset=["면적_숫자"]),
             y="면적_숫자",
             points="outliers",
@@ -155,10 +175,7 @@ try:
             labels={"면적_숫자": "공원 면적(㎡)"}
         )
 
-        st.plotly_chart(
-            fig_outlier,
-            use_container_width=True
-        )
+        st.plotly_chart(fig5, use_container_width=True)
 
         st.metric(
             "이상치로 탐지된 공원 수",
@@ -172,13 +189,25 @@ try:
             use_container_width=True
         )
 
+        st.caption(
+            "이상치는 통계적 기준으로 탐지된 값이며, "
+            "실제 데이터 오류라는 뜻은 아닙니다."
+        )
+
     else:
         st.warning("분석할 수 있는 면적 데이터가 없습니다.")
 
-    # 전체 데이터
     st.divider()
-    st.subheader("📋 공원 데이터 확인")
-    st.dataframe(df, use_container_width=True)
+
+    # 6. 전체 데이터 확인
+    st.header("📋 전체 공원 데이터")
+
+    st.dataframe(
+        df,
+        use_container_width=True
+    )
 
 except Exception as e:
-    st.error(f"오류가 발생했습니다: {e}")
+
+    st.error("데이터를 불러오거나 분석하는 중 오류가 발생했습니다.")
+    st.exception(e)
