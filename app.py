@@ -14,8 +14,6 @@ st.set_page_config(
 st.title("🌳 서울시 주요 공원 데이터 분석")
 st.write("서울시 공원들의 면적과 지역별 특징을 분석합니다.")
 
-# 엑셀 파일 주소
-url = "https://raw.githubusercontent.com/minji0716/seoulpark/main/data/%EC%84%9C%EC%9A%B8%EC%8B%9C%20%EC%A3%BC%EC%9A%94%20%EA%B3%B5%EC%9B%90%ED%98%84%ED%99%A9(2026%20%ED%95%98%EB%B0%98%EA%B8%B0).xlsx"
 
 # 데이터 불러오기
 @st.cache_data
