@@ -24,8 +24,10 @@ def load_data():
         engine="openpyxl"
     )
 
-    raw.columns = raw.iloc[1]
+       raw.columns = raw.iloc[1]
     df = raw.iloc[2:].copy().reset_index(drop=True)
+
+    print("실제 열 이름:", df.columns.tolist())
 
     return df
 
