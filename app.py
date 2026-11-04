@@ -18,17 +18,16 @@ st.write("서울시 공원들의 면적과 지역별 특징을 분석합니다."
 # 데이터 불러오기
 @st.cache_data
 def load_data():
-    import requests
-from io import BytesIO
-
-@st.cache_data
-def load_data():
-    response = requests.get(url, timeout=30)
-    response.raise_for_status()
-
     raw = pd.read_excel(
-        BytesIO(response.content),
+        "data/서울시 주요 공원현황(2026 하반기).xlsx",
         header=None,
+        engine="openpyxl"
+    )
+
+    raw.columns = raw.iloc[1]
+    df = raw.iloc[2:].copy().reset_index(drop=True)
+
+    return df
         engine="openpyxl"
     )
 
