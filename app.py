@@ -39,16 +39,11 @@ def load_data():
 
 # 데이터 분석 실행
 try:
+    st.write("1. 데이터 불러오기 시작")
 
     df = load_data()
 
-    # 면적 숫자만 추출
-    df["면적_숫자"] = pd.to_numeric(
-        df["면적"].astype(str)
-        .str.replace(",", "", regex=False)
-        .str.extract(r"([\d.]+)")[0],
-        errors="coerce"
-    )
+    st.write("2. 데이터 불러오기 완료")
 
     st.success("데이터 불러오기 성공!")
 
