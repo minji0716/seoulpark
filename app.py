@@ -28,13 +28,6 @@ def load_data():
     df = raw.iloc[2:].copy().reset_index(drop=True)
 
     return df
-        engine="openpyxl"
-    )
-
-    raw.columns = raw.iloc[1]
-    df = raw.iloc[2:].copy().reset_index(drop=True)
-
-    return df
 
 # 데이터 분석 실행
 try:
